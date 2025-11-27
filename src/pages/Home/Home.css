@@ -1,0 +1,88 @@
+.main_home{
+    width: 90%;
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+}
+
+.secao_logo{
+    display: flex;
+    flex-direction: column;
+    width: 360px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.secao_logo svg {
+    width: 240px;
+    margin-top: 50px;
+}
+
+.secao_logo img{
+    width: 300px;
+}
+
+.secao_cards{
+    width: calc(100% - 360px);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10%;
+}
+
+
+
+/* RODAPE */
+
+
+.whatsapp{
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  transition: transform 0.5s ease-in-out,
+              filter 0.5s ease-in-out;
+}
+
+.whatsapp img{
+  width: 80px;
+  filter: drop-shadow(0 5px 1px #00000025);
+}
+
+.whatsapp:hover{
+  transform: scale(1.2);
+  filter: drop-shadow(0 10px 2px #00000025);
+}
+
+
+
+
+/* MEDIA */
+@media screen and (max-width: 1050px){
+    .main_home{
+        flex-direction: column;
+        align-items: center;
+        width: 95%;
+    }
+
+    .secao_logo{
+        position: relative;
+        margin-top: 50px;
+    }
+
+    .secao_logo svg{
+        position: absolute;
+        top: 230px;
+        background-color: #FFD188;
+        padding: 10px 40px 5px;
+        border-radius: 20px;
+        box-shadow: 0 4px 4px 2px #00000025;
+    }
+
+    .secao_logo img{
+        width: 150px;
+    }
+
+    .secao_cards{
+        width: 100%;
+    }
+}

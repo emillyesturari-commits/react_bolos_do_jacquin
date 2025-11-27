@@ -7,7 +7,9 @@ import { getBolos } from '../../services/bolosService';
 import CardProduto from '../../components/CardProduto/CardProduto';
 import Carrossel from '../../components/Carrossel/Carrossel';
 import Header from '../../components/Header/Header';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import Footer from '../../components/Footer/Footer';
+import jacquin404 from '../../assets/jacquin-not-found.png'
 
 
 
@@ -15,26 +17,32 @@ export default function Produtos() {
 
     const [bolos, setBolos] = useState<Bolo[]>([]); //composto por uma lista e uma função
     const location = useLocation();
+    const { categoria } = useParams<{ categoria: string }>();
 
     const parametrosPesquisados = new URLSearchParams(location.search);
     const termo_pesquisado = parametrosPesquisados.get('query');
 
+
     const fetchBolos = async () => {
         try {
             const dados = await getBolos();
-            if (termo_pesquisado) {
-                const dados_filtrados = dados.filter(b => 
-                    b.nome.toLowerCase().includes(termo_pesquisado.toLowerCase()) || 
+            if (categoria) {
+                const dados_filtrados = dados.filter(b => b.categorias.some(cat => cat.toLowerCase() === categoria.toLowerCase()))
+                setBolos(dados_filtrados);
+            }
+            else if (termo_pesquisado) {
+                const dados_filtrados = dados.filter(b =>
+                    b.nome.toLowerCase().includes(termo_pesquisado.toLowerCase()) ||
                     b.descricao.toLowerCase().includes(termo_pesquisado.toLowerCase()) ||
                     b.categorias.some(cat => cat.toLowerCase().includes(termo_pesquisado.toLowerCase()))
                 )
                 setBolos(dados_filtrados)
-            }else{
-                console.log("Dados retornados da API", dados);
-                setBolos(dados);
+            } else {
+                console.log("Nenhuma categoria ou termo de busca definidos");
+                setBolos([]);
             }
         } catch (error) {
-            console.error("Erro ao executar getBolo", error);
+            console.error("Erro ao executar getBolo", error)
         }
     }
     //toLowerCase = transforma caracteres maiusculos em minusculos
@@ -58,7 +66,11 @@ export default function Produtos() {
                     <div className="titulo">
                         <span>
                             {
-                                termo_pesquisado ? `Resultados para: ${termo_pesquisado}` : "Nome da categoria"
+                                categoria
+                                    ? categoria.charAt(0).toUpperCase() + categoria.slice(1).toLowerCase()
+                                    : termo_pesquisado
+
+                                        ? `Resultados para: ${termo_pesquisado}` : "Nenhum filtro aplicado"
                             }
                         </span>
                         <hr />
@@ -74,8 +86,17 @@ export default function Produtos() {
                                     preco={b.preco}
                                     imagem={b.imagens[0] ?? ""} //?? usado p caso der erro na img 
                                     peso={b.peso}
+
                                 />
                             ))
+                        }
+                        {
+                            bolos.length == 0 &&
+                            <div className='jacquin404'>
+                                <h3>O termo pesquisado <br /> não foi encontrado</h3>
+                                <img src={jacquin404} alt="foto_termo_nao_encontrado" />
+
+                            </div>
                         }
 
 
@@ -88,6 +109,7 @@ export default function Produtos() {
                     <img src={whatsapp} alt="icone do whatsapp" />
                 </a>
             </main>
+            <Footer />
         </>
     )
 }
