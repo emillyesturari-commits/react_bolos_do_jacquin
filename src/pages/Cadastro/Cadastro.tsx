@@ -1,21 +1,57 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import './Cadastro.css';
 import type { Bolo } from '../../types/Bolo';
-import { getBolos } from '../../services/bolosService';
+import { deleteBolo, getBolos } from '../../services/bolosService';
 import { formatosServices } from '../../services/formatosServices';
+import ModalCustomizado from '../../components/ModalCustomizado/ModalCustomizado';
+import { NumericFormat } from 'react-number-format';
 
 export default function Cadastro() {
+    // para mudar o valor sempre chamar pelo set
 
     const [bolos, setBolos] = useState<Bolo[]>([]);
     const [clicouNaLixeira, setClicouNaLixeira] = useState<boolean>(false)
-
     const [idParaDeletar, setIdParaDeletar] = useState<string>("");
+    const [aposConfirmacaoDeBoloRemovido, setAposConfirmacaoDeBoloRemovido] = useState<boolean>(false);
+    const [propsModalDeErroOuSucesso, setPropsModalDeErroOuSucesso] = useState<{ exibir: boolean, titulo: string, corpo: string }>({ exibir: false, titulo: "", corpo: "" });
+    const [nomeBolo, setNomeBolo] = useState<string>("");
+    const [categorias, setCategorias] = useState<string>("");
+    const [imagem, setImagem] = useState<File | undefined>(undefined);
+    const [preco, setPreco] = useState<number | undefined>(undefined);
+    const [peso, setPeso] = useState<number | undefined>(undefined);
+    const [descricao, setDescricao] = useState<string>("");
+    const [bgImageInputColor, setBgImageInputColor] = useState<string>(" #ffffff")
 
     const abrirModalParaConfirmarDelete = (id: string) => {
         setClicouNaLixeira(true);
         setIdParaDeletar(id);
+    }
+
+    const fecharModalConfirmacaoDelete = () => {
+        setClicouNaLixeira(false);
+    }
+
+    const fecharModalDeErroOuSucesso = () => {
+        setPropsModalDeErroOuSucesso({ ...propsModalDeErroOuSucesso, exibir: false });
+    }
+
+    //... spread operator = usado para manter os valores das variaveis
+
+    const exibirModalDeErroOuSucesso = (titulo: string, corpo: string) => {
+        setPropsModalDeErroOuSucesso({ exibir: true, titulo, corpo });
+    }
+
+    const removerItemAposConfirmacao = async (id: string) => {
+        try {
+            await deleteBolo(id);
+            setAposConfirmacaoDeBoloRemovido(true);
+            await fetBolos();
+            fecharModalConfirmacaoDelete();
+        } catch (error) {
+            exibirModalDeErroOuSucesso("Erro", "Erro ao deletar o bolo")
+        }
     }
 
     const fetBolos = async () => {
@@ -25,6 +61,18 @@ export default function Cadastro() {
             setBolos(dados);
         } catch (error) {
             console.error("Erro ao executar getBolos: ", error);
+        }
+    }
+
+    const carregarImagem = (img: ChangeEvent<HTMLInputElement>) => {
+        const file = img.target.files?.[0];
+        if (file?.type.includes("image")) {
+            setImagem(file);
+            setBgImageInputColor(" #5cb85c");
+        }
+        else {
+            setImagem(undefined);
+            setBgImageInputColor(" #ff2c2c");
         }
     }
 
@@ -47,13 +95,27 @@ export default function Cadastro() {
                         <div className="cadastro_coluna1">
                             <div className="bolos">
                                 <label htmlFor="bolo">Bolo</label>
-                                <input type="text" name="" id="bolo" />
+                                <input
+                                    type="text"
+                                    id="bolo"
+                                    placeholder='Insira o nome do bolo'
+                                    value={nomeBolo}
+                                    onChange={e => setNomeBolo(e.target.value)}
+
+                                />
                             </div>
 
                             <div className="categoria_img">
                                 <div className="categoria">
                                     <label htmlFor="cat">Categoria</label>
-                                    <input type="text" name="" id="cat" />
+                                    <input
+                                        type="text"
+                                        id="cat"
+                                        placeholder='Chocolate, Morango, Coco...'
+                                        value={categorias}
+                                        onChange={c => setCategorias(c.target.value)}
+
+                                    />
                                 </div>
                                 <div className="img">
                                     <label htmlFor="img">
@@ -66,29 +128,74 @@ export default function Cadastro() {
                                             </svg>
                                         </div>
                                     </label>
-                                    <input type="file" name="" id="img" />
+                                    <input
+                                        type="file"
+                                        id="img"
+                                        accept='image/*'  // imagem de qualquer tipo
+                                        onChange={carregarImagem}
+
+
+                                    />
                                 </div>
                             </div>
 
                             <div className="valor_peso">
                                 <div className="valor">
                                     <label htmlFor="val">Valor</label>
-                                    <input type="text" name="" id="val" />
+                                    <NumericFormat
+                                        id='val'
+                                        placeholder='Insira o preço (R$)'
+                                        value={preco ?? ""}  // verificando se o valor é do tipo false 
+                                        thousandSeparator="."
+                                        decimalSeparator=','
+                                        prefix='R$ '
+                                        decimalScale={2}
+                                        fixedDecimalScale
+                                        allowNegative={false}
+                                        onValueChange={(values) => {
+                                            setPreco(values.floatValue ?? undefined);
+                                        }}
+                                        inputMode='decimal'
+                                    />
                                 </div>
 
                                 <div className="peso">
                                     <label htmlFor="peso">Peso</label>
-                                    <input type="text" name="" id="peso" />
+                                    <NumericFormat
+                                        id='peso'
+                                        placeholder='Inserir'
+                                        value={peso ?? ""}
+                                        thousandSeparator="."
+                                        decimalSeparator=','
+                                        decimalScale={3}
+                                        fixedDecimalScale
+                                        allowNegative={false}
+                                        suffix=' kg'
+                                        inputMode='decimal'
+                                        onValueChange={(values) => {
+                                            setPeso(values.floatValue ?? undefined);
+                                        }}
+
+
+                                    />
                                 </div>
                             </div>
                         </div>
 
                         <div className="cadastro_coluna2">
                             <label htmlFor="desc">Descrição</label>
-                            <textarea name="" id="desc"></textarea>
+                            <textarea
+                                id="desc"
+                                maxLength={200}
+                                placeholder='Escreva detalhes sobre o bolo'
+                                value={descricao}
+                                onChange={d => setDescricao(d.target.value)}
+
+                            />
                         </div>
                     </div>
-                    <input type="button" value="Cadastrar" />
+                    <button className='botaoSubmit' type='submit'>Cadastrar</button>
+
                 </section>
 
                 <section className="container_lista">
@@ -117,7 +224,7 @@ export default function Cadastro() {
                                         <td data-cell="Peso: ">{b.peso ? formatosServices.PesoEmKg(b.peso) : "Não cadastrado"}</td>
                                         {/* ? se sim  : se não */}
                                         <td>
-                                            <svg onClick={ () => abrirModalParaConfirmarDelete(b.id!) } xmlns="http://www.w3.org/2000/svg"
+                                            <svg onClick={() => abrirModalParaConfirmarDelete(b.id!)} xmlns="http://www.w3.org/2000/svg"
                                                 viewBox="0 0 640 640">
                                                 <path fill="currentColor"
                                                     d="M247.4 79.1C251 70 259.9 64 269.7 64L370.3 64C380.1 64 388.9 70 392.6 79.1L412.2 128L227.8 128L247.4 79.1zM210.6 128L104 128C99.6 128 96 131.6 96 136C96 140.4 99.6 144 104 144L536 144C540.4 144 544 140.4 544 136C544 131.6 540.4 128 536 128L429.4 128L407.5 73.1C401.4 58 386.7 48 370.3 48L269.7 48C253.3 48 238.6 58 232.6 73.1L210.6 128zM128 192L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 192L496 192L496 512C496 538.5 474.5 560 448 560L192 560C165.5 560 144 538.5 144 512L144 192L128 192zM224 264C224 259.6 220.4 256 216 256C211.6 256 208 259.6 208 264L208 472C208 476.4 211.6 480 216 480C220.4 480 224 476.4 224 472L224 264zM328 264C328 259.6 324.4 256 320 256C315.6 256 312 259.6 312 264L312 472C312 476.4 315.6 480 320 480C324.4 480 328 476.4 328 472L328 264zM432 264C432 259.6 428.4 256 424 256C419.6 256 416 259.6 416 264L416 472C416 476.4 419.6 480 424 480C428.4 480 432 476.4 432 472L432 264z" />
@@ -132,6 +239,30 @@ export default function Cadastro() {
                 </section>
             </main>
             <Footer />
+            <ModalCustomizado
+                mostrarModalQuando={clicouNaLixeira}
+                aoCancelar={fecharModalConfirmacaoDelete}
+                titulo='Confirmar exclusão'
+                corpo='Tem certeza que deseja remover este item?'
+                customizarBotoes={true}
+                textoBotaoConfirmacao='Excluir'
+                textoBotaoCancelamento='Cancelar'
+                aoConfirmar={() => removerItemAposConfirmacao(idParaDeletar)}
+                exibirConteudoCentralizado={true}
+            />
+            <ModalCustomizado
+                mostrarModalQuando={aposConfirmacaoDeBoloRemovido}
+                aoCancelar={() => setAposConfirmacaoDeBoloRemovido(false)}
+                titulo='Sucesso'
+                corpo='Bolo removido!'
+            />
+            <ModalCustomizado
+                mostrarModalQuando={propsModalDeErroOuSucesso.exibir}
+                aoCancelar={fecharModalDeErroOuSucesso}
+                titulo={propsModalDeErroOuSucesso.titulo}
+                corpo={propsModalDeErroOuSucesso.corpo}
+                exibirConteudoCentralizado={true}
+            />
         </>
     )
 }

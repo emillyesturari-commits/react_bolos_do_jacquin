@@ -11,6 +11,16 @@ export const getBolos = async (): Promise<Bolo[]> => {
    }
 }
 
+export const deleteBolo = async (idBolo: string): Promise <void> => {
+   try {
+      await axios.delete( `http://localhost:3000/bolos/${idBolo}` );
+   } catch (error) {
+      console.error("Erro ao deletar o bolo: ", error);
+      throw error;
+   }
+}
+
 // throw = lançar 
 // catch = executado quando aparecer um error no try 
 // data = dados
+// void = vazia

@@ -128,32 +128,6 @@
       "id": "8jy2",
       "preco": 42,
       "peso": 1.3
-    },
-    {
-      "nome": "Coco recheado",
-      "categorias": [
-        "coco"
-      ],
-      "descricao": "Massa fofinha de coco com recheio cremoso e envolvente, trazendo um sabor tropical irresistível.",
-      "imagens": [
-        "9786134582154.png"
-      ],
-      "id": "33u3",
-      "preco": 46.9,
-      "peso": null
-    },
-    {
-      "nome": "Bolo de casamento",
-      "categorias": [
-        "cerimonias"
-      ],
-      "descricao": "Elegante e saboroso, ideal para celebrar momentos únicos com um toque de doçura inesquecível.",
-      "imagens": [
-        "7852364781455.png"
-      ],
-      "id": "d7ty",
-      "preco": 120,
-      "peso": 2.5
     }
   ]
 }
